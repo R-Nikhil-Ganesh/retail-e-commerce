@@ -2,21 +2,30 @@
   const customerPanel = document.getElementById("customerPanel");
   const chooseCustomerBtn = document.getElementById("chooseCustomerBtn");
   const createProfileForm = document.getElementById("createProfileForm");
+  const statusNode = document.getElementById("loginStatus");
 
-  async function saveProfile(profile) {
-    const response = await fetch("/api/profile", {
+  function setStatus(message, isError = false) {
+    if (!statusNode) return;
+    statusNode.textContent = message;
+    statusNode.style.color = isError ? "#d08d8d" : "";
+  }
+
+  async function loginWithProfile(profile) {
+    const response = await fetch("/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(profile),
     });
 
     if (!response.ok) {
-      throw new Error("Could not save profile");
+      const payload = await response.json().catch(() => ({}));
+      throw new Error(payload.detail || "Could not sign in");
     }
   }
 
   function toStorePage() {
-    window.location.href = "/store";
+    const safeNext = typeof NEXT_PATH === "string" && NEXT_PATH.startsWith("/") ? NEXT_PATH : "/store";
+    window.location.href = safeNext;
   }
 
   window.usePresetProfile = async function usePresetProfile(index) {
@@ -34,10 +43,11 @@
     };
 
     try {
-      await saveProfile(payload);
+      setStatus("Signing in...");
+      await loginWithProfile(payload);
       toStorePage();
     } catch (error) {
-      window.alert("Failed to select preset profile. Please try again.");
+      setStatus(error.message || "Failed to select preset profile. Please try again.", true);
     }
   };
 
@@ -59,11 +69,17 @@
       gender: document.getElementById("gender").value,
     };
 
+    if (!Number.isFinite(payload.height_cm) || !Number.isFinite(payload.weight_kg)) {
+      setStatus("Please enter valid height and weight values.", true);
+      return;
+    }
+
     try {
-      await saveProfile(payload);
+      setStatus("Signing in...");
+      await loginWithProfile(payload);
       toStorePage();
     } catch (error) {
-      window.alert("Failed to save profile. Please try again.");
+      setStatus(error.message || "Failed to save profile. Please try again.", true);
     }
   });
 })();

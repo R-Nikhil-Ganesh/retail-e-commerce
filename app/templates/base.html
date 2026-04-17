@@ -17,9 +17,15 @@
       <span class="nav-logo">◈</span> dhukan
     </a>
     <div class="nav-links">
-      <a href="/login" class="nav-link">Login</a>
+      {% if request.state.user %}
+      <a href="/store" class="nav-link">Store</a>
+      <a href="/dashboard" class="nav-link">Dashboard</a>
       {% if request.url.path != '/' %}
       <a href="/profile" class="nav-link">My Profile</a>
+      {% endif %}
+      <button type="button" class="nav-link" id="logoutBtn">Logout</button>
+      {% else %}
+      <a href="/login" class="nav-link">Login</a>
       {% endif %}
     </div>
   </nav>

@@ -8,6 +8,7 @@
     <div class="hero-badge">AMD Slingshot Ideathon 2026</div>
     <h1 class="panel-title">Sign In To Demo</h1>
     <p class="dash-sub">Login to continue to the store. Select a preset customer profile or create your own before entering.</p>
+    <div id="loginStatus" class="dash-sub" role="status" aria-live="polite"></div>
   </section>
 
   <section class="role-grid">
@@ -111,6 +112,7 @@
 {% block scripts %}
 <script>
 const SAMPLE_USERS = {{ users | tojson }};
+const NEXT_PATH = {{ next_path | tojson }};
 </script>
 <script src="/static/js/login.js"></script>
 {% endblock %}

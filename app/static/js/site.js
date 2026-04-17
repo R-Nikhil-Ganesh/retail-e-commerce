@@ -28,6 +28,17 @@
         toggle.textContent = nextTheme === "dark" ? "Light" : "Dark";
       });
     }
+
+    const logoutBtn = document.getElementById("logoutBtn");
+    if (logoutBtn) {
+      logoutBtn.addEventListener("click", async () => {
+        try {
+          await fetch("/api/auth/logout", { method: "POST" });
+        } finally {
+          window.location.href = "/login";
+        }
+      });
+    }
   });
 
   window.dhukanSetMainImage = function dhukanSetMainImage(thumb) {
