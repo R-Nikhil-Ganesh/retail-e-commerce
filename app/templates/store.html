@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Store — dhukan{% endblock %}
+{% block description %}Browse all available products in the dhukan demo store.{% endblock %}
+
+{% block content %}
+<div class="store-page container">
+  <div class="store-header">
+    <div>
+      <h1 class="panel-title">Store</h1>
+      <p class="dash-sub">All available products in one place. Open any item for fit guidance and return-risk intelligence.</p>
+    </div>
+    <a href="/profile" class="btn btn-ghost btn-sm">Edit Profile</a>
+  </div>
+
+  <div class="store-filters">
+    <a href="/store" class="filter-btn {% if not selected_category %}active{% endif %}">All</a>
+    {% for c in categories %}
+    <a href="/store?category={{ c }}" class="filter-btn {% if selected_category == c %}active{% endif %}">{{ c|title }}</a>
+    {% endfor %}
+  </div>
+
+  {% if selected_category %}
+  <div class="store-filter-state">
+    Showing <strong>{{ selected_category|title }}</strong>
+    <a href="/store" class="btn btn-ghost btn-sm">Clear filter</a>
+  </div>
+  {% endif %}
+
+  {% if products %}
+  <div class="product-grid store-grid">
+    {% for p in products %}
+    <a href="/product/{{ p.id }}" class="product-card">
+      <div class="product-card-img-wrap">
+        <img src="{{ p.image }}" alt="{{ p.title }}" class="product-card-img"/>
+        {% set rate = (p.historical_return_rate * 100)|int %}
+        {% if rate >= 35 %}
+        <span class="risk-pill risk-high">High Return Risk</span>
+        {% elif rate >= 22 %}
+        <span class="risk-pill risk-medium">Medium Risk</span>
+        {% else %}
+        <span class="risk-pill risk-low">Low Risk</span>
+        {% endif %}
+      </div>
+      <div class="product-card-body">
+        <div class="product-card-brand">{{ p.brand }}</div>
+        <div class="product-card-title">{{ p.title }}</div>
+        <div class="product-card-meta">
+          <span class="price">₹{{ p.price }}</span>
+          <span class="rating">★ {{ p.avg_rating }}</span>
+        </div>
+        <div class="product-card-insight">
+          Historical returns: <strong>{{ rate }}%</strong>
+        </div>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="store-empty">
+    <h2>No products found</h2>
+    <p>Try a different category or clear the filter to view all products.</p>
+    <a href="/store" class="btn btn-primary btn-sm">View all products</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

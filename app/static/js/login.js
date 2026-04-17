@@ -15,8 +15,8 @@
     }
   }
 
-  function toShopperExperience() {
-    window.location.href = "/product/P001";
+  function toStorePage() {
+    window.location.href = "/store";
   }
 
   window.usePresetProfile = async function usePresetProfile(index) {
@@ -35,7 +35,7 @@
 
     try {
       await saveProfile(payload);
-      toShopperExperience();
+      toStorePage();
     } catch (error) {
       window.alert("Failed to select preset profile. Please try again.");
     }
@@ -61,7 +61,7 @@
 
     try {
       await saveProfile(payload);
-      toShopperExperience();
+      toStorePage();
     } catch (error) {
       window.alert("Failed to save profile. Please try again.");
     }

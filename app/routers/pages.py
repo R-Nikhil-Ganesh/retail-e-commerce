@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Query, Request
 from fastapi.responses import HTMLResponse
 import app.main as state
 from app import db
@@ -6,10 +6,34 @@ from app import db
 router = APIRouter()
 
 @router.get("/", response_class=HTMLResponse)
-async def login_root(request: Request):
-    return state.templates.TemplateResponse("login.html", {
+async def landing_page(request: Request):
+    return state.templates.TemplateResponse("landing.html", {
         "request": request,
-        "users": db.get_users(),
+    })
+
+
+@router.get("/store", response_class=HTMLResponse)
+async def store_page(request: Request, category: str | None = Query(default=None)):
+    all_products = db.get_products()
+    categories = sorted({
+        str(p.get("category", "")).strip().lower()
+        for p in all_products
+        if str(p.get("category", "")).strip()
+    })
+
+    products = all_products
+    selected_category = (category or "").strip().lower()
+    if selected_category:
+        products = [
+            p for p in products
+            if str(p.get("category", "")).strip().lower() == selected_category
+        ]
+
+    return state.templates.TemplateResponse("store.html", {
+        "request": request,
+        "products": products,
+        "categories": categories,
+        "selected_category": selected_category,
     })
 
 

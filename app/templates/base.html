@@ -6,7 +6,7 @@
   <title>{% block title %}dhukan — AI Return Reduction{% endblock %}</title>
   <meta name="description" content="{% block description %}dhukan helps fashion shoppers pick the right size and helps retailers reduce returns using AI-powered fit intelligence.{% endblock %}"/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="/static/css/main.css"/>
   <script defer src="/static/js/site.js"></script>
   {% block head %}{% endblock %}
@@ -18,8 +18,9 @@
     </a>
     <div class="nav-links">
       <a href="/login" class="nav-link">Login</a>
+      {% if request.url.path != '/' %}
       <a href="/profile" class="nav-link">My Profile</a>
-      <button class="nav-link nav-theme-toggle" id="themeToggle" type="button">Theme</button>
+      {% endif %}
     </div>
   </nav>
   {% block content %}{% endblock %}

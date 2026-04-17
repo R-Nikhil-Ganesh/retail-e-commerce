@@ -1,139 +1,52 @@
 {% extends "base.html" %}
-{% block title %}dhukan — Smarter Fit. Fewer Returns.{% endblock %}
+{% block title %}dhukan — AI Return Reduction Platform{% endblock %}
 
 {% block content %}
-<!-- HERO -->
 <section class="hero">
   <div class="hero-glow hero-glow-1"></div>
   <div class="hero-glow hero-glow-2"></div>
   <div class="hero-content">
-    <div class="hero-badge">🏆 AMD Slingshot Ideathon 2026 · Retail &amp; E-commerce</div>
-    <h1 class="hero-title">Stop losing money<br/><span class="gradient-text">to wrong-size returns.</span></h1>
-    <p class="hero-sub">dhukan is an AI-powered return-reduction platform that helps shoppers find their perfect fit and gives retailers the intelligence to fix the root causes of returns — before they happen.</p>
+    <div class="hero-badge">AMD Slingshot Ideathon 2026 · Retail and E-commerce</div>
+    <h1 class="hero-title">Make Online Fashion<br/><span class="gradient-text">more predictable.</span></h1>
+    <p class="hero-sub">dhukan helps e-commerce teams reduce costly returns through fit intelligence, review signal extraction, and transparent risk scoring. Sign in to continue to the product store.</p>
     <div class="hero-actions">
-      <a href="/product/P001" class="btn btn-primary btn-lg">Try Shopper Demo →</a>
-      <a href="/dashboard" class="btn btn-ghost btn-lg">View Retailer Dashboard</a>
+      <a href="/login" class="btn btn-primary btn-lg">Login To Continue</a>
     </div>
     <div class="hero-stats">
-      <div class="stat-item"><span class="stat-num">30%</span><span class="stat-label">of fashion orders<br/>are returned</span></div>
+      <div class="stat-item"><span class="stat-num">30%</span><span class="stat-label">average fashion<br/>return volume</span></div>
       <div class="stat-div"></div>
-      <div class="stat-item"><span class="stat-num">₹640B</span><span class="stat-label">reverse logistics<br/>cost annually (India)</span></div>
+      <div class="stat-item"><span class="stat-num">72%</span><span class="stat-label">returns linked to<br/>size or fit mismatch</span></div>
       <div class="stat-div"></div>
-      <div class="stat-item"><span class="stat-num">72%</span><span class="stat-label">of returns cite<br/>fit or sizing issues</span></div>
+      <div class="stat-item"><span class="stat-num">38%</span><span class="stat-label">estimated reduction<br/>with guidance</span></div>
       <div class="stat-div"></div>
-      <div class="stat-item"><span class="stat-num">38%</span><span class="stat-label">reduction potential<br/>with dhukan AI</span></div>
+      <div class="stat-item"><span class="stat-num">5</span><span class="stat-label">live demo SKUs<br/>in the store</span></div>
     </div>
   </div>
 </section>
 
-<!-- HOW IT WORKS -->
-<section class="section">
-  <div class="container">
-    <div class="section-header">
-      <h2>How dhukan works</h2>
-      <p>Two intelligent experiences. One platform.</p>
-    </div>
-    <div class="how-grid">
-      <div class="how-card how-card-shopper">
-        <div class="how-icon">🛍️</div>
-        <h3>For Shoppers</h3>
-        <ol class="how-steps">
-          <li>Browse a product and enter your measurements</li>
-          <li>dhukan AI recommends your best size instantly</li>
-          <li>See fit confidence, review insights, and risk warnings</li>
-          <li>Buy with confidence — fewer wrong purchases</li>
-        </ol>
-        <a href="/product/P001" class="btn btn-primary btn-sm mt-1">Try It Now →</a>
-      </div>
-      <div class="how-card how-card-retailer">
-        <div class="how-icon">📊</div>
-        <h3>For Retailers</h3>
-        <ol class="how-steps">
-          <li>Dashboard shows high-risk SKUs and return trends</li>
-          <li>AI identifies root causes: sizing, imagery, quality</li>
-          <li>Actionable fixes: improve size guides, re-photograph, rewrite copy</li>
-          <li>Reduce returns, save logistics costs, boost conversion</li>
-        </ol>
-        <a href="/dashboard" class="btn btn-teal btn-sm mt-1">View Dashboard →</a>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- PRODUCTS PREVIEW -->
-<section class="section section-dark">
-  <div class="container">
-    <div class="section-header">
-      <h2>Demo Products</h2>
-      <p>Click any product to see the full AI fit &amp; risk experience</p>
-    </div>
-    <div class="product-grid">
-      {% for p in products %}
-      <a href="/product/{{ p.id }}" class="product-card">
-        <div class="product-card-img-wrap">
-          <img src="{{ p.image }}" alt="{{ p.title }}" class="product-card-img"/>
-          {% set rate = (p.historical_return_rate * 100)|int %}
-          {% if rate >= 35 %}
-            <span class="risk-pill risk-high">High Risk</span>
-          {% elif rate >= 22 %}
-            <span class="risk-pill risk-medium">Medium Risk</span>
-          {% else %}
-            <span class="risk-pill risk-low">Low Risk</span>
-          {% endif %}
-        </div>
-        <div class="product-card-body">
-          <div class="product-card-brand">{{ p.brand }}</div>
-          <div class="product-card-title">{{ p.title }}</div>
-          <div class="product-card-meta">
-            <span class="price">₹{{ p.price }}</span>
-            <span class="rating">★ {{ p.avg_rating }}</span>
-          </div>
-          <div class="product-card-insight">
-            Return rate: <strong>{{ rate }}%</strong>
-          </div>
-        </div>
-      </a>
-      {% endfor %}
-    </div>
-  </div>
-</section>
-
-<!-- VALUE PROP -->
 <section class="section">
   <div class="container">
     <div class="value-grid">
       <div class="value-card">
         <div class="value-icon teal">🎯</div>
-        <h3>Precise Fit Engine</h3>
-        <p>Combines body measurements, size charts, fit preference, and review consensus to deliver personalized size recommendations with a confidence score.</p>
+        <h3>Fit Intelligence</h3>
+        <p>Personalized fit recommendations using profile attributes and size-chart signals.</p>
       </div>
       <div class="value-card">
         <div class="value-icon amber">🔍</div>
-        <h3>Review Intelligence</h3>
-        <p>Automatically extracts fit signals, quality concerns, and color mismatch patterns from shopper reviews to surface the insights that matter most.</p>
+        <h3>Review Insights</h3>
+        <p>Extracts concerns like runs small, material quality gaps, and color mismatch patterns.</p>
       </div>
       <div class="value-card">
         <div class="value-icon rose">📉</div>
-        <h3>Return Risk Scoring</h3>
-        <p>Every product-size-shopper combination gets a 0–100 risk score with human-readable explanations and retailer-side fix recommendations.</p>
+        <h3>Return Risk</h3>
+        <p>Rule-based scoring with clear reasons and confidence support for each product-size decision.</p>
       </div>
       <div class="value-card">
-        <div class="value-icon purple">📈</div>
-        <h3>Retailer Analytics</h3>
-        <p>A merchant dashboard that shows which SKUs are bleeding returns, what the root causes are, and what actions will have the highest ROI impact.</p>
+        <div class="value-icon purple">📊</div>
+        <h3>Operations View</h3>
+        <p>Retail teams can still access dashboard analytics after login from the app navigation.</p>
       </div>
-    </div>
-  </div>
-</section>
-
-<!-- CTA BAND -->
-<section class="cta-band">
-  <div class="container cta-inner">
-    <h2>Ready to see dhukan in action?</h2>
-    <p>Experience the full shopper journey or explore the retailer analytics platform.</p>
-    <div class="hero-actions">
-      <a href="/product/P001" class="btn btn-primary btn-lg">Launch Shopper Demo</a>
-      <a href="/dashboard" class="btn btn-ghost btn-lg">Open Retailer Dashboard</a>
     </div>
   </div>
 </section>
