@@ -4,36 +4,65 @@
   let currentBand = "all";
 
   function bandForScore(score) {
-    if (score >= 67) return "high";
-    if (score >= 34) return "medium";
+    const numeric = Number(score) || 0;
+    if (numeric >= 67) return "high";
+    if (numeric >= 34) return "medium";
     return "low";
   }
 
+  function escapeHtml(value) {
+    return String(value ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
   function reasonChips(reasons) {
-    return (reasons || []).map((reason) => `<span class="badge-chip">${reason}</span>`).join("");
+    return (reasons || []).map((reason) => `<span class="badge-chip">${escapeHtml(reason)}</span>`).join("");
   }
 
   function renderRow(product) {
-    const bandClass = `band-${product.risk_band}`;
+    const band = product.risk_band || bandForScore(product.risk_score);
+    const bandClass = `band-${band}`;
     return `
-      <tr data-band="${product.risk_band}">
+      <tr data-band="${band}">
         <td>
-          <strong>${product.title}</strong><br />
-          <span class="rating">${product.brand} · ${product.category}</span>
+          <strong>${escapeHtml(product.title)}</strong><br />
+          <span class="rating">${escapeHtml(product.brand)} · ${escapeHtml(product.category)}</span>
         </td>
-        <td><span class="risk-score ${bandClass}">${product.risk_score}</span></td>
-        <td>${product.return_rate}%</td>
+        <td><span class="risk-score ${bandClass}">${Number(product.risk_score) || 0}</span></td>
+        <td>${Number(product.return_rate) || 0}%</td>
         <td>${reasonChips(product.top_reasons)}</td>
-        <td>${product.suggested_action}</td>
-        <td><a class="btn btn-sm btn-ghost" href="/product/${product.id}">Open</a></td>
+        <td>${escapeHtml(product.suggested_action || "No suggestion available")}</td>
+        <td><a class="btn btn-sm btn-ghost" href="/product/${encodeURIComponent(product.id)}">Open</a></td>
       </tr>
     `;
   }
 
   function applyFilter() {
     document.querySelectorAll("#riskTable tbody tr").forEach((row) => {
+      if (!row.dataset.band) {
+        row.style.display = "";
+        return;
+      }
       row.style.display = currentBand === "all" || row.dataset.band === currentBand ? "" : "none";
     });
+  }
+
+  function renderNoDataRow(message) {
+    document.getElementById("tableBody").innerHTML = `<tr><td colspan="6" class="table-loading">${escapeHtml(message)}</td></tr>`;
+  }
+
+  function setDashboardUnavailable(message) {
+    document.getElementById("kpiOrders").textContent = "N/A";
+    document.getElementById("kpiReturnRate").textContent = "N/A";
+    document.getElementById("kpiReturnSub").textContent = message;
+    document.getElementById("kpiHighRisk").textContent = "N/A";
+    document.getElementById("kpiReduction").textContent = "N/A";
+    document.getElementById("actionsList").innerHTML = `<li class="action-item">${escapeHtml(message)}</li>`;
+    renderNoDataRow(message);
   }
 
   function setupCharts(metrics) {
@@ -45,14 +74,17 @@
     if (trendChart) trendChart.destroy();
     if (categoryChart) categoryChart.destroy();
 
+    const monthlyTrend = Array.isArray(metrics.monthly_trend) ? metrics.monthly_trend : [];
+    const categoryBreakdown = metrics.category_breakdown || {};
+
     trendChart = new Chart(trendCtx, {
       type: "line",
       data: {
-        labels: metrics.monthly_trend.map((item) => item.month),
+        labels: monthlyTrend.map((item) => item.month),
         datasets: [
           {
             label: "Actual",
-            data: metrics.monthly_trend.map((item) => item.return_rate),
+            data: monthlyTrend.map((item) => item.return_rate),
             borderColor: "#0f766e",
             backgroundColor: "rgba(15,118,110,0.12)",
             tension: 0.35,
@@ -61,7 +93,7 @@
           },
           {
             label: "AI Projected",
-            data: metrics.monthly_trend.map((item) => item.ai_projected),
+            data: monthlyTrend.map((item) => item.ai_projected),
             borderColor: "#1d4ed8",
             backgroundColor: "rgba(29,78,216,0.10)",
             borderDash: [6, 4],
@@ -84,9 +116,9 @@
     categoryChart = new Chart(categoryCtx, {
       type: "doughnut",
       data: {
-        labels: Object.keys(metrics.category_breakdown),
+        labels: Object.keys(categoryBreakdown),
         datasets: [{
-          data: Object.values(metrics.category_breakdown),
+          data: Object.values(categoryBreakdown),
           backgroundColor: ["#0f766e", "#1d4ed8", "#b45309", "#be123c"],
           borderWidth: 0,
         }],
@@ -99,42 +131,62 @@
   }
 
   async function loadReviewTiles() {
-    const tasks = PRODUCTS.map(async (product) => {
+    const tasks = (Array.isArray(PRODUCTS) ? PRODUCTS : []).map(async (product) => {
       const node = document.getElementById(`ri-${product.id}`);
       if (!node) return;
-      const response = await fetch(`/api/review-summary/${product.id}`);
-      const payload = await response.json();
-      if (!response.ok) {
-        node.innerHTML = `<div class="ri-product">${product.title}</div><div class="rating">Review summary unavailable</div>`;
-        return;
+      try {
+        const response = await fetch(`/api/review-summary/${encodeURIComponent(product.id)}`);
+        const payload = await response.json();
+        if (!response.ok) {
+          node.innerHTML = `<div class="ri-product">${escapeHtml(product.title)}</div><div class="rating">Review summary unavailable</div>`;
+          return;
+        }
+        node.innerHTML = `
+          <div class="ri-product">${escapeHtml(product.title)}</div>
+          <div class="review-fit-tag">${escapeHtml(payload.fit_tag)}</div>
+          <div class="rating" style="margin-bottom: 8px;">${escapeHtml(payload.fit_summary)}</div>
+          <ul class="ri-list">${(payload.top_concerns || []).map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
+        `;
+      } catch {
+        node.innerHTML = `<div class="ri-product">${escapeHtml(product.title)}</div><div class="rating">Review summary unavailable</div>`;
       }
-      node.innerHTML = `
-        <div class="ri-product">${product.title}</div>
-        <div class="review-fit-tag">${payload.fit_tag}</div>
-        <div class="rating" style="margin-bottom: 8px;">${payload.fit_summary}</div>
-        <ul class="ri-list">${(payload.top_concerns || []).map((item) => `<li>${item}</li>`).join("")}</ul>
-      `;
     });
     await Promise.all(tasks);
   }
 
   async function loadMetrics() {
-    const response = await fetch("/api/dashboard-metrics");
-    const metrics = await response.json();
-    if (!response.ok) return;
+    try {
+      const response = await fetch("/api/dashboard-metrics");
+      const metrics = await response.json();
+      if (!response.ok) {
+        setDashboardUnavailable("Unable to load dashboard metrics right now.");
+        return;
+      }
 
-    document.getElementById("kpiOrders").textContent = metrics.total_orders.toLocaleString();
-    document.getElementById("kpiReturnRate").textContent = `${metrics.estimated_return_rate}%`;
-    document.getElementById("kpiReturnSub").textContent = `Projected with current catalog mix`;
-    document.getElementById("kpiHighRisk").textContent = metrics.high_risk_skus;
-    document.getElementById("kpiReduction").textContent = `${metrics.reduction_potential}%`;
+      document.getElementById("kpiOrders").textContent = Number(metrics.total_orders || 0).toLocaleString();
+      document.getElementById("kpiReturnRate").textContent = `${Number(metrics.estimated_return_rate || 0)}%`;
+      document.getElementById("kpiReturnSub").textContent = "Projected with current catalog mix";
+      document.getElementById("kpiHighRisk").textContent = Number(metrics.high_risk_skus || 0);
+      document.getElementById("kpiReduction").textContent = `${Number(metrics.reduction_potential || 0)}%`;
 
-    document.getElementById("tableBody").innerHTML = metrics.products.map(renderRow).join("");
-    document.getElementById("actionsList").innerHTML = metrics.top_actions.map((item) => `<li class="action-item">${item}</li>`).join("");
+      const products = Array.isArray(metrics.products) ? metrics.products : [];
+      if (!products.length) {
+        renderNoDataRow("No dashboard product data available.");
+      } else {
+        document.getElementById("tableBody").innerHTML = products.map(renderRow).join("");
+      }
 
-    setupCharts(metrics);
-    applyFilter();
-    await loadReviewTiles();
+      const actions = Array.isArray(metrics.top_actions) ? metrics.top_actions : [];
+      document.getElementById("actionsList").innerHTML = actions.length
+        ? actions.map((item) => `<li class="action-item">${escapeHtml(item)}</li>`).join("")
+        : '<li class="action-item">No recommended actions available yet.</li>';
+
+      setupCharts(metrics);
+      applyFilter();
+      await loadReviewTiles();
+    } catch {
+      setDashboardUnavailable("Unable to load dashboard metrics right now.");
+    }
   }
 
   window.filterTable = function filterTable(band, button) {
