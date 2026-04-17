@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% block title %}Retailer Dashboard — dhukan{% endblock %}
+{% block description %}Retailer analytics dashboard — return risk by SKU, root cause analysis, and AI-powered fix recommendations.{% endblock %}
+{% block head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="dash-page">
+  <!-- HEADER -->
+  <div class="dash-header">
+    <div class="container dash-header-inner">
+      <div>
+        <div class="dash-brand">◈ dhukan Retailer Intelligence</div>
+        <h1 class="dash-title">Return Risk Dashboard</h1>
+        <p class="dash-sub">Real-time insight into return drivers, high-risk SKUs, and actionable fixes</p>
+      </div>
+      <a href="/product/P001" class="btn btn-ghost btn-sm">← Shopper View</a>
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- KPI CARDS -->
+    <div class="kpi-grid" id="kpiGrid">
+      <div class="kpi-card">
+        <div class="kpi-icon kpi-blue">📦</div>
+        <div class="kpi-val" id="kpiOrders">—</div>
+        <div class="kpi-label">Total Orders</div>
+        <div class="kpi-sub">Across 5 active SKUs</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon kpi-rose">↩️</div>
+        <div class="kpi-val" id="kpiReturnRate">—</div>
+        <div class="kpi-label">Est. Return Rate</div>
+        <div class="kpi-sub" id="kpiReturnSub"></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon kpi-amber">⚠️</div>
+        <div class="kpi-val" id="kpiHighRisk">—</div>
+        <div class="kpi-label">High-Risk SKUs</div>
+        <div class="kpi-sub">Flagged for immediate action</div>
+      </div>
+      <div class="kpi-card kpi-card-highlight">
+        <div class="kpi-icon kpi-teal">📉</div>
+        <div class="kpi-val" id="kpiReduction">—</div>
+        <div class="kpi-label">Reduction Potential</div>
+        <div class="kpi-sub">With dhukan AI interventions</div>
+      </div>
+    </div>
+
+    <!-- CHARTS ROW -->
+    <div class="charts-row">
+      <div class="chart-card chart-card-wide">
+        <div class="chart-card-header">
+          <h3>Return Rate Trend</h3>
+          <span class="chart-legend"><span class="legend-dot legend-actual"></span>Actual <span class="legend-dot legend-ai"></span>AI Projected</span>
+        </div>
+        <canvas id="trendChart" height="110"></canvas>
+      </div>
+      <div class="chart-card">
+        <div class="chart-card-header"><h3>By Category</h3></div>
+        <canvas id="categoryChart" height="160"></canvas>
+      </div>
+    </div>
+
+    <!-- PRODUCT RISK TABLE -->
+    <div class="table-card">
+      <div class="table-card-header">
+        <h3>Product Risk Analysis</h3>
+        <div class="table-filters">
+          <button class="filter-btn active" onclick="filterTable('all', this)">All</button>
+          <button class="filter-btn" onclick="filterTable('high', this)">High Risk</button>
+          <button class="filter-btn" onclick="filterTable('medium', this)">Medium</button>
+          <button class="filter-btn" onclick="filterTable('low', this)">Low Risk</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table class="risk-table" id="riskTable">
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th>Risk Score</th>
+              <th>Return Rate</th>
+              <th>Top Reasons</th>
+              <th>Suggested Fix</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            <tr><td colspan="6" class="table-loading"><div class="spinner"></div> Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- BOTTOM ROW -->
+    <div class="dash-bottom-row">
+      <!-- TOP ACTIONS -->
+      <div class="actions-card">
+        <h3 class="actions-title">🔧 Recommended Actions</h3>
+        <ul id="actionsList" class="actions-list">
+          <li class="action-item skeleton">Loading…</li>
+        </ul>
+      </div>
+      <!-- REVIEW INSIGHTS -->
+      <div class="insights-card">
+        <h3 class="actions-title">💬 Review Intelligence Panel</h3>
+        <div id="reviewInsights" class="review-insights-grid">
+          {% for p in products %}
+          <div class="ri-item" id="ri-{{ p.id }}">
+            <div class="ri-product">{{ p.title[:28] }}{% if p.title|length > 28 %}…{% endif %}</div>
+            <div class="ri-loading"><div class="spinner-sm"></div></div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const PRODUCTS = {{ products | tojson }};
+</script>
+<script src="/static/js/dashboard.js"></script>
+{% endblock %}

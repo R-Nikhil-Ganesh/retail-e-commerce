@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% block title %}My Profile — dhukan{% endblock %}
+{% block description %}Manage shopper measurements and fit preferences used for AI size recommendation and return risk scoring.{% endblock %}
+
+{% block content %}
+<div class="profile-page container">
+  <div class="profile-header">
+    <div>
+      <h1 class="panel-title">Shopper Profile</h1>
+      <p class="dash-sub">Set your body and fit preferences once. Product pages use this profile for recommendations.</p>
+    </div>
+    <a href="/product/P001" class="btn btn-ghost btn-sm">Go To Shopper Demo</a>
+  </div>
+
+  <div class="profile-layout">
+    <section class="profile-card">
+      <h2>My Details</h2>
+      <form id="profileForm" class="profile-form-grid">
+        <div class="fit-field">
+          <label for="name">Name</label>
+          <input type="text" id="name" required />
+        </div>
+        <div class="fit-field">
+          <label for="height">Height (cm)</label>
+          <input type="number" id="height" min="140" max="220" required />
+        </div>
+        <div class="fit-field">
+          <label for="weight">Weight (kg)</label>
+          <input type="number" id="weight" min="35" max="150" required />
+        </div>
+        <div class="fit-field">
+          <label for="bodyType">Body Type</label>
+          <select id="bodyType" required>
+            <option value="regular">Regular</option>
+            <option value="athletic">Athletic</option>
+            <option value="broad">Broad / Plus</option>
+            <option value="pear">Pear / Curvy</option>
+            <option value="petite">Petite / Slim</option>
+          </select>
+        </div>
+        <div class="fit-field">
+          <label for="usualSize">Usual Brand Size</label>
+          <select id="usualSize" required>
+            <option value="XS">XS</option>
+            <option value="S">S</option>
+            <option value="M">M</option>
+            <option value="L">L</option>
+            <option value="XL">XL</option>
+            <option value="XXL">XXL</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+            <option value="9">9</option>
+            <option value="10">10</option>
+            <option value="11">11</option>
+            <option value="12">12</option>
+          </select>
+        </div>
+        <div class="fit-field">
+          <label for="fitPref">Fit Preference</label>
+          <select id="fitPref" required>
+            <option value="regular">Regular</option>
+            <option value="slim">Slim / Fitted</option>
+            <option value="loose">Loose / Relaxed</option>
+          </select>
+        </div>
+        <div class="fit-field">
+          <label for="gender">Gender</label>
+          <select id="gender" required>
+            <option value="unisex">Unisex</option>
+            <option value="men">Men</option>
+            <option value="women">Women</option>
+          </select>
+        </div>
+        <div class="fit-field profile-submit-wrap">
+          <button class="btn btn-primary btn-full" type="submit">Save Profile</button>
+        </div>
+      </form>
+      <div id="profileSaved" class="alt-product hidden">Profile saved. All product recommendations now use this profile.</div>
+    </section>
+
+    <section class="profile-card">
+      <h2>Quick Demo Profiles</h2>
+      <p class="dash-sub">Use a sample shopper for fast demos.</p>
+      <div class="sample-list">
+        {% for u in users %}
+        <button class="sample-profile-btn" type="button" onclick="applySample({{ loop.index0 }})">
+          <strong>{{ u.name }}</strong>
+          <span>{{ u.height_cm }} cm · {{ u.weight_kg }} kg · {{ u.body_type|title }} · {{ u.usual_size }}</span>
+        </button>
+        {% endfor %}
+      </div>
+      <div class="profile-hint">
+        After saving, visit any product page and click Find My Best Fit. Return risk and recommendations will use your saved profile.
+      </div>
+    </section>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const INITIAL_PROFILE = {{ profile | tojson }};
+const SAMPLE_USERS = {{ users | tojson }};
+</script>
+<script src="/static/js/profile.js"></script>
+{% endblock %}

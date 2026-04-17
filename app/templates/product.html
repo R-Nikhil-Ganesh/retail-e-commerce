@@ -1,0 +1,233 @@
+{% extends "base.html" %}
+{% block title %}{{ product.title }} — dhukan{% endblock %}
+{% block description %}Buy {{ product.title }} by {{ product.brand }} with AI-powered fit recommendations and return risk analysis.{% endblock %}
+
+{% block content %}
+<div class="product-page">
+  <!-- BREADCRUMB -->
+  <div class="container">
+    <div class="breadcrumb">
+      <a href="/">Home</a> / <a href="/">{{ product.category|title }}</a> / <span>{{ product.title }}</span>
+    </div>
+  </div>
+
+  <!-- MAIN PRODUCT LAYOUT -->
+  <div class="container product-layout">
+    <!-- LEFT: Image -->
+    <div class="product-gallery">
+      <div class="product-img-main">
+        <img src="{{ product.image }}" alt="{{ product.title }}" id="mainImg"/>
+      </div>
+      <div class="product-img-thumbs">
+        <img src="{{ product.image }}" alt="View 1" class="thumb active" onclick="setMain(this)"/>
+        <img src="{{ product.image }}" alt="View 2" class="thumb" onclick="setMain(this)" style="filter:brightness(0.92) saturate(1.2)"/>
+        <img src="{{ product.image }}" alt="View 3" class="thumb" onclick="setMain(this)" style="filter:brightness(1.08) hue-rotate(10deg)"/>
+      </div>
+    </div>
+
+    <!-- RIGHT: Details -->
+    <div class="product-details">
+      <div class="product-brand-tag">{{ product.brand }}</div>
+      <h1 class="product-title">{{ product.title }}</h1>
+      <div class="product-meta-row">
+        <div class="product-rating">
+          {% for i in range(5) %}
+            {% if i < product.avg_rating|int %}<span class="star filled">★</span>
+            {% else %}<span class="star">★</span>{% endif %}
+          {% endfor %}
+          <span class="rating-count">{{ product.review_count }} reviews</span>
+        </div>
+        <div class="product-return-rate">
+          Return rate: <strong>{{ (product.historical_return_rate * 100)|int }}%</strong>
+        </div>
+      </div>
+      <div class="product-price">₹{{ product.price }}</div>
+      <p class="product-desc">{{ product.description }}</p>
+
+      <!-- SIZE SELECTOR -->
+      <div class="size-section">
+        <div class="size-label">Select Size</div>
+        <div class="size-options" id="sizeOptions">
+          {% for size in product.sizes %}
+          <button class="size-btn" data-size="{{ size }}" onclick="selectSize(this)">{{ size }}</button>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- RISK BADGE (updates on size select) -->
+      <div class="risk-badge-row">
+        <div id="riskBadge" class="risk-badge risk-neutral">
+          <span id="riskIcon">◉</span>
+          <span id="riskLabel">Select a size to see return risk</span>
+        </div>
+      </div>
+
+      <!-- CTA BUTTONS -->
+      <div class="product-ctas">
+        <button class="btn btn-primary btn-full" onclick="addToCart()">Add to Bag</button>
+        <button class="btn btn-ghost btn-full" onclick="scrollToFit()">🎯 Find My Best Fit</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FIT PANEL -->
+  <div class="container">
+    <div class="fit-panel" id="fitPanel">
+      <div class="fit-panel-header">
+        <div class="fit-panel-title">
+          <span class="fit-icon">🎯</span>
+          <div>
+            <h2>Find My Best Fit</h2>
+            <p>Your recommendation uses the details from your shopper profile.</p>
+          </div>
+        </div>
+        <a href="/profile" class="btn btn-ghost btn-sm">Edit Profile</a>
+      </div>
+
+      <div class="profile-summary-grid" id="profileSummaryGrid">
+        <div class="profile-summary-item">
+          <label>Name</label>
+          <div id="profileName">--</div>
+        </div>
+        <div class="profile-summary-item">
+          <label>Height</label>
+          <div id="profileHeight">--</div>
+        </div>
+        <div class="profile-summary-item">
+          <label>Weight</label>
+          <div id="profileWeight">--</div>
+        </div>
+        <div class="profile-summary-item">
+          <label>Body Type</label>
+          <div id="profileBodyType">--</div>
+        </div>
+        <div class="profile-summary-item">
+          <label>Usual Size</label>
+          <div id="profileUsualSize">--</div>
+        </div>
+        <div class="profile-summary-item">
+          <label>Fit Preference</label>
+          <div id="profileFitPref">--</div>
+        </div>
+      </div>
+
+      <div class="fit-cta-row">
+        <button class="btn btn-primary" id="fitBtn" onclick="getFitRecommendation()">Get My Size →</button>
+      </div>
+
+      <!-- RESULT -->
+      <div id="fitResult" class="fit-result hidden">
+        <div class="fit-result-main">
+          <div class="fit-result-size-wrap">
+            <div class="fit-result-label">Recommended Size</div>
+            <div class="fit-result-size" id="recSize">M</div>
+            <div class="fit-confidence-bar-wrap">
+              <div class="fit-confidence-bar" id="confBar"></div>
+            </div>
+            <div class="fit-conf-label"><span id="confPct">--</span>% confidence</div>
+          </div>
+          <div class="fit-result-explain">
+            <div class="fit-explain-text" id="fitExplain"></div>
+            <div id="fitWarning" class="fit-warning hidden"></div>
+            <div class="fit-insights" id="fitInsights"></div>
+            <div id="altSize" class="alt-size hidden">
+              Also consider: <strong id="altSizeVal"></strong>
+            </div>
+            <div id="altProduct" class="alt-product hidden">
+              Similar lower-risk item: <strong id="altProductVal"></strong>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- REVIEW INTELLIGENCE -->
+  <div class="container">
+    <div class="review-panel" id="reviewPanel">
+      <h2 class="panel-title">What shoppers are saying</h2>
+      <div id="reviewLoading" class="loading-state">
+        <div class="spinner"></div> Analyzing reviews…
+      </div>
+      <div id="reviewContent" class="hidden">
+        <div class="review-intel-grid">
+          <div class="review-fit-summary">
+            <div class="review-fit-tag" id="fitTag"></div>
+            <p id="fitSummaryText"></p>
+          </div>
+          <div class="review-sentiments">
+            <div class="sentiment-row">
+              <span class="s-label positive">👍 Positive</span>
+              <div class="s-bar-wrap"><div class="s-bar s-pos" id="sPos"></div></div>
+              <span class="s-count" id="sPosCount"></span>
+            </div>
+            <div class="sentiment-row">
+              <span class="s-label neutral">😐 Neutral</span>
+              <div class="s-bar-wrap"><div class="s-bar s-neu" id="sNeu"></div></div>
+              <span class="s-count" id="sNeuCount"></span>
+            </div>
+            <div class="sentiment-row">
+              <span class="s-label negative">👎 Negative</span>
+              <div class="s-bar-wrap"><div class="s-bar s-neg" id="sNeg"></div></div>
+              <span class="s-count" id="sNegCount"></span>
+            </div>
+          </div>
+        </div>
+        <div class="review-concerns-row">
+          <div class="concerns-block">
+            <div class="concerns-title">Top concerns before buying</div>
+            <ul id="topConcerns" class="concerns-list"></ul>
+          </div>
+          <div class="shopper-quote-block">
+            <div class="quote-icon">"</div>
+            <p id="shopperQuote" class="shopper-quote"></p>
+          </div>
+        </div>
+      </div>
+      <!-- RAW REVIEWS -->
+      <div class="reviews-list" id="reviewsList">
+        {% for r in reviews[:5] %}
+        <div class="review-card">
+          <div class="review-header">
+            <div class="review-stars">{% for i in range(r.rating) %}★{% endfor %}{% for i in range(5 - r.rating) %}<span style="opacity:.3">★</span>{% endfor %}</div>
+            <span class="review-fit-pill {% if r.fit_tag == 'runs_small' %}pill-warn{% elif r.fit_tag == 'true_to_size' %}pill-ok{% else %}pill-info{% endif %}">
+              {{ r.fit_tag.replace('_', ' ')|title }}
+            </span>
+          </div>
+          <p class="review-text">{{ r.text }}</p>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- MORE PRODUCTS -->
+  <div class="container">
+    <h2 class="panel-title">More products</h2>
+    <div class="more-products-row">
+      {% for p in all_products %}
+      {% if p.id != product.id %}
+      <a href="/product/{{ p.id }}" class="mini-product-card">
+        <img src="{{ p.image }}" alt="{{ p.title }}"/>
+        <div class="mini-title">{{ p.title }}</div>
+        <div class="mini-price">₹{{ p.price }}</div>
+      </a>
+      {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast" class="toast hidden">Added to bag! ✓</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const PRODUCT_ID = "{{ product.id }}";
+const SIZES = {{ product.sizes | tojson }};
+const ALL_PRODUCTS = {{ all_products | tojson }};
+const INITIAL_PROFILE = {{ profile | tojson }};
+</script>
+<script src="/static/js/product.js"></script>
+{% endblock %}

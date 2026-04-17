@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{% block title %}dhukan — AI Return Reduction{% endblock %}</title>
+  <meta name="description" content="{% block description %}dhukan helps fashion shoppers pick the right size and helps retailers reduce returns using AI-powered fit intelligence.{% endblock %}"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/static/css/main.css"/>
+  <script defer src="/static/js/site.js"></script>
+  {% block head %}{% endblock %}
+</head>
+<body>
+  <nav class="nav">
+    <a href="/" class="nav-brand">
+      <span class="nav-logo">◈</span> dhukan
+    </a>
+    <div class="nav-links">
+      <a href="/login" class="nav-link">Login</a>
+      <a href="/profile" class="nav-link">My Profile</a>
+      <button class="nav-link nav-theme-toggle" id="themeToggle" type="button">Theme</button>
+    </div>
+  </nav>
+  {% block content %}{% endblock %}
+  <footer class="footer">
+    <div class="footer-inner">
+      <span class="footer-brand">◈ dhukan</span>
+      <span class="footer-tagline">AI-Powered Return Reduction · AMD Slingshot Ideathon 2026</span>
+    </div>
+  </footer>
+  {% block scripts %}{% endblock %}
+</body>
+</html>
