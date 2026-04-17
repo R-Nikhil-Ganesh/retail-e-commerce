@@ -1,24 +1,25 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional, List
+from typing import Literal
 
 
 class ShopperProfile(BaseModel):
-    name: str = "Demo Shopper"
-    height_cm: float
-    weight_kg: float
-    body_type: str = "regular"
-    usual_size: str = "M"
-    fit_preference: str = "regular"
-    gender: str = "unisex"
+    name: str = Field(default="Demo Shopper", min_length=1, max_length=60)
+    height_cm: float = Field(ge=120, le=240)
+    weight_kg: float = Field(ge=25, le=250)
+    body_type: Literal["athletic", "pear", "broad", "petite", "regular"] = "regular"
+    usual_size: str = Field(default="M", min_length=1, max_length=8)
+    fit_preference: Literal["slim", "regular", "loose"] = "regular"
+    gender: Literal["unisex", "men", "women"] = "unisex"
 
 class FitRequest(BaseModel):
-    product_id: str
-    height_cm: float
-    weight_kg: float
-    body_type: str = "regular"          # athletic / pear / broad / petite / regular
-    usual_brand_size: str = "M"
-    fit_preference: str = "regular"     # slim / regular / loose
-    gender: str = "unisex"
+    product_id: str = Field(min_length=1, max_length=20)
+    height_cm: float = Field(ge=120, le=240)
+    weight_kg: float = Field(ge=25, le=250)
+    body_type: Literal["athletic", "pear", "broad", "petite", "regular"] = "regular"  # athletic / pear / broad / petite / regular
+    usual_brand_size: str = Field(default="M", min_length=1, max_length=8)
+    fit_preference: Literal["slim", "regular", "loose"] = "regular"  # slim / regular / loose
+    gender: Literal["unisex", "men", "women"] = "unisex"
 
 class FitResponse(BaseModel):
     recommended_size: str
@@ -29,12 +30,12 @@ class FitResponse(BaseModel):
     warning: Optional[str] = None
 
 class RiskRequest(BaseModel):
-    product_id: str
-    selected_size: str
-    height_cm: Optional[float] = None
-    weight_kg: Optional[float] = None
-    body_type: Optional[str] = None
-    fit_preference: Optional[str] = "regular"
+    product_id: str = Field(min_length=1, max_length=20)
+    selected_size: str = Field(min_length=1, max_length=8)
+    height_cm: Optional[float] = Field(default=None, ge=120, le=240)
+    weight_kg: Optional[float] = Field(default=None, ge=25, le=250)
+    body_type: Optional[Literal["athletic", "pear", "broad", "petite", "regular"]] = None
+    fit_preference: Optional[Literal["slim", "regular", "loose"]] = "regular"
 
 class RiskResponse(BaseModel):
     score: int

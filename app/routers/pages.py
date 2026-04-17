@@ -2,7 +2,6 @@ from fastapi import APIRouter, Query, Request
 from fastapi.responses import HTMLResponse
 import app.main as state
 from app import db
-from app.services import auth
 from urllib.parse import quote
 from fastapi.responses import RedirectResponse
 
